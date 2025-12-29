@@ -1,0 +1,15 @@
+# Build Folders
+bin/
+obj/
+Debug/
+Release/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.log
+
+# Others
+*.DS_Store
+*.env
