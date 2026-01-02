@@ -19,6 +19,21 @@ namespace GBStore.Controllers
             _context = context;
         }
 
+        public IActionResult ByBrand(int id)
+        {
+            var products = _context.Products
+                .Where(p => p.BrandId == id)
+                .Include(p => p.Brand)
+                .ToList();
+
+            ViewBag.BrandName = _context.Brands
+                .Where(b => b.BrandId == id)
+                .Select(b => b.BrandName)
+                .FirstOrDefault();
+
+            return View(products);
+        }
+
         // GET: Products
         public async Task<IActionResult> Index()
         {

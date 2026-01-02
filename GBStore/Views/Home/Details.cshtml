@@ -7,10 +7,24 @@
     <div class="container px-4 px-lg-5 my-5">
         <div class="row gx-4 gx-lg-5 align-items-center">
 
+            @{
+                string imgPath = "";
+                var extensions = new[] { ".jpg", ".png" }; // danh sách định dạng
+                foreach (var ext in extensions)
+                {
+                    var file = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", Model.Picture + ext);
+                    if (System.IO.File.Exists(file))
+                    {
+                        imgPath = "/images/" + Model.Picture + ext;
+                        break;
+                    }
+                }
+            }
+
             <!-- Product image -->
             <div class="col-md-6">
                 <img class="card-img-top mb-5 mb-md-0 img-fluid"
-                     src="@Model.Picture"
+                     src="@imgPath"
                      alt="@Model.Name" />
             </div>
 

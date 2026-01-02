@@ -17,16 +17,16 @@
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="#!">G-Base Store</a>
+            <a class="navbar-brand" asp-controller="home" asp-action="Index">
+                <img src="~/images/logo-removebg-preview.png" alt="G-Base Store" style="height:50px;"/>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Trang Chủ</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!">Thương Hiệu</a>
-                    </li>
+                    @await Component.InvokeAsync("BrandMenu")
                     <li class="nav-item">
                         <a class="nav-link" href="#!">Loại</a>
                     </li>
@@ -34,7 +34,7 @@
                         <a class="nav-link" href="#!">Thẻ</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" asp-controller="home" asp-action="Index" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="#!">All Products</a></li>
                             <li><hr class="dropdown-divider" /></li>

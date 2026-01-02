@@ -14,7 +14,20 @@
                         <!-- Product image-->
                         <a asp-action="Details" asp-route-id="@item.ProductId">
                             <div class="product-img-wrapper">
-                                <img class="card-img-top" src="@item.Picture" alt="@item.Name" />
+                                @{
+                                    string imgPath = "";
+                                    var extensions = new[] { ".jpg", ".png"}; // danh sách định dạng
+                                    foreach (var ext in extensions)
+                                    {
+                                        var file = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", item.Picture + ext);
+                                        if (System.IO.File.Exists(file))
+                                        {
+                                            imgPath = "/images/" + item.Picture + ext;
+                                            break;
+                                        }
+                                    }
+                                }
+                                <img class="card-img-top" src="@imgPath" alt="@item.Name" />
                             </div>
 						</a>
                         <!-- Product details-->
