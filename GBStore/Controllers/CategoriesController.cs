@@ -18,8 +18,6 @@ namespace GBStore.Controllers
         {
             _context = context;
         }
-
-        // GET: Categories
         public async Task<IActionResult> Index()
         {
             return View(await _context.Categories.ToListAsync());

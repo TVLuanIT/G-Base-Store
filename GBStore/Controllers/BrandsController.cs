@@ -18,23 +18,5 @@ namespace GBStore.Controllers
         {
             _context = context;
         }
-
-        // Action hiển thị sản phẩm theo brand
-        public IActionResult Products(int id)
-        {
-            var products = _context.Products
-                .Include(p => p.Brand)
-                .Include(p => p.Category)
-                .Where(p => p.BrandId == id)
-                .ToList();
-
-            // Lấy tên brand để hiển thị trên view
-            ViewBag.BrandName = _context.Brands
-                .Where(b => b.BrandId == id)
-                .Select(b => b.BrandName)
-                .FirstOrDefault();
-
-            return View(products);
-        }
     }
 }

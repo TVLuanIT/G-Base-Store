@@ -1,24 +1,24 @@
-﻿@model List<Brand>
+﻿@model List<Category>
 
 <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle"
        href="#"
-       id="brandDropdown"
+       id="categoryDropdown"
        role="button"
        data-bs-toggle="dropdown"
        aria-expanded="false">
-        Thương hiệu
+        Loại sản phẩm
     </a>
 
-    <ul class="dropdown-menu" aria-labelledby="brandDropdown">
-        @foreach (var brand in Model)
+    <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+        @foreach (var category in Model)
         {
             <li>
                 <a class="dropdown-item"
                    asp-controller="Products"
-                   asp-action="ProductsByBrand"
-                   asp-route-id="@brand.BrandId">
-                    @brand.BrandName
+                   asp-action="ProductsByCategory"
+                   asp-route-id="@category.CategoryId">
+					@category.CategoryName
                 </a>
             </li>
         }

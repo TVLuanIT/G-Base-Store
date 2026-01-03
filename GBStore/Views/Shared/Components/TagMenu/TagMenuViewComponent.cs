@@ -4,19 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GBStore.ViewComponents
 {
-    public class BrandMenuViewComponent : ViewComponent
+    public class TagMenuViewComponent : ViewComponent
     {
         private readonly GbstoreContext _context;
 
-        public BrandMenuViewComponent(GbstoreContext context)
+        public TagMenuViewComponent(GbstoreContext context)
         {
             _context = context;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var brands = await _context.Brands.OrderBy(b=>b.BrandName).ToListAsync();
-            return View(brands);
+            var tags = await _context.Tags.OrderBy(t=>t.TagName).ToListAsync();
+            return View(tags);
         }
     }
 }

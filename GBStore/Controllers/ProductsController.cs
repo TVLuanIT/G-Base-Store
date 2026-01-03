@@ -19,19 +19,58 @@ namespace GBStore.Controllers
             _context = context;
         }
 
-        public IActionResult ByBrand(int id)
+        // Action hiển thị sản phẩm theo tag
+        public IActionResult ProductsByTag(int id)
         {
             var products = _context.Products
-                .Where(p => p.BrandId == id)
                 .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.Tag)
+                .Where(p => p.TagId == id)
                 .ToList();
 
-            ViewBag.BrandName = _context.Brands
+            // Lấy tên tag để hiển thị trên view
+            ViewBag.Title = _context.Tags
+                .Where(b => b.TagId == id)
+                .Select(b => b.TagName)
+                .FirstOrDefault();
+
+            return View("Products", products);
+        }
+
+        // Action hiển thị sản phẩm theo category
+        public IActionResult ProductsByCategory(int id)
+        {
+            var products = _context.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Where(p => p.CategoryId == id)
+                .ToList();
+
+            // Lấy tên category để hiển thị trên view
+            ViewBag.Title = _context.Categories
+                .Where(b => b.CategoryId == id)
+                .Select(b => b.CategoryName)
+                .FirstOrDefault();
+
+            return View("Products", products);
+        }
+
+        // Action hiển thị sản phẩm theo brand
+        public IActionResult ProductsByBrand(int id)
+        {
+            var products = _context.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Where(p => p.BrandId == id)
+                .ToList();
+
+            ViewBag.Title = _context.Brands
                 .Where(b => b.BrandId == id)
                 .Select(b => b.BrandName)
                 .FirstOrDefault();
 
-            return View(products);
+            return View("Products", products);
         }
 
         // GET: Products

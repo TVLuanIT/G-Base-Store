@@ -27,21 +27,8 @@
                         <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Trang Chủ</a>
                     </li>
                     @await Component.InvokeAsync("BrandMenu")
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!">Loại</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!">Thẻ</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdown" asp-controller="home" asp-action="Index" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#!">All Products</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" href="#!">Popular Items</a></li>
-                            <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
-                        </ul>
-                    </li>
+					@await Component.InvokeAsync("CategoryMenu")
+					@await Component.InvokeAsync("TagMenu")
                 </ul>
                 <form class="d-flex">
                     <button class="btn btn-outline-dark" type="submit">
@@ -73,6 +60,8 @@
     <footer class="py-5 bg-dark">
         <div class="container"><p class="m-0 text-center text-white">Copyright &copy; G-Base Store 2025</p></div>
     </footer>
+
+    @RenderSection("Scripts", required: false)
 
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
