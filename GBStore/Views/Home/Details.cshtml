@@ -87,4 +87,139 @@
             </div>
         </div>
     </div>
+
+    <br />
+
+    <div class="d-flex justify-content-center align-items-start gap-4 mb-3">
+        <!-- Cột trái: Điểm trung bình + sao -->
+        <div class="avg-score text-center">
+            <div class="avg-value mb-2">
+                <h2 class="mb-0">
+                    @(Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating).ToString("0.0") : "0.0")
+                </h2>
+                <small>Đánh giá trung bình</small>
+            </div>
+            <div class="avg-stars" style="color:#ffca08; font-size:1.8rem;">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (i <= (Model.Reviews.Any() ? Math.Round(Model.Reviews.Average(r => r.Rating)) : 0))
+                    {
+                        <span>&#9733;</span>
+                    }
+                    else
+                    {
+                        <span style="color:lightgray">&#9733;</span>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Cột phải: Thống kê từng sao -->
+        <div class="rating-breakdown text-start" style="min-width:500px; max-width:700px;">
+            @for (int star = 5; star >= 1; star--)
+            {
+                var count = Model.Reviews.Count(r => r.Rating == star);
+                var total = Model.Reviews.Count();
+                var percent = total > 0 ? (count * 100 / total) : 0;
+
+                <div class="d-flex align-items-center mb-1">
+                    <span class="me-2" style="width:20px;">@star</span>
+                    <span class="me-2">&#9733;</span>
+
+                    <!-- progress bar -->
+                    <div class="progress flex-grow-1 me-2" style="height:12px;">
+                        <div class="progress-bar" role="progressbar"
+                             style=@($"width:{(percent > 0 ? percent : 1)}%")
+                             aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+
+                    <span class="rating-count flex-shrink-0" style="white-space:nowrap;">
+                        @percent% | @count đánh giá
+                    </span>
+                </div>
+            }
+        </div>
+
+        <div style="height:100%;" class="d-flex justify-content-center mt-3">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal" style="width:100%">
+                Đánh Giá Ngay
+            </button>
+        </div>
+
+    </div>
+
+    @if (Model.Reviews.Any())
+    {
+        @foreach (var review in Model.Reviews)
+        {
+            <div class="review border p-2 mb-2 rounded" style="display:block">
+                <strong>@review.Customer.Name</strong> -
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (i <= review.Rating)
+                    {
+                        <span style="color:#ffca08">&#9733;</span>
+                    }
+                    else
+                    {
+                        <span style="color:lightgray">&#9733;</span>
+                    }
+                }
+                <p>@review.Comment</p>
+                <small>@review.CreatedDate?.ToString("dd/MM/yyyy")</small>
+            </div>
+        }
+    }
+
+    <!-- Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <!-- modal-lg = to hơn -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reviewModalLabel">Gửi đánh giá của bạn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="Create" method="post" id="reviewForm">
+                        <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                        <input type="hidden" name="CustomerId" value="@User.FindFirst("UserId")?.Value" />
+                        <input type="hidden" name="Rating" id="ratingValue" value="0" /> <!-- Giá trị rating -->
+                        
+                        <!-- Container label + stars -->
+                        <div style="display:flex; align-items:center; margin-bottom:10px;">
+                            <!-- Label bên trái -->
+                            <label style="margin-right:50px; white-space:nowrap;">
+                                Bạn cảm thấy thế nào về sản phẩm nhỉ?
+                            </label>
+
+                            <!-- Star rating + text dưới sao -->
+                            <div id="starRatingContainer" style="text-align:center;">
+                                <div id="starRating" style="font-size:2.2rem; color:gray; cursor:pointer;">
+                                    <span data-value="1" class="star">&#9733;</span>
+                                    <span data-value="2" class="star">&#9733;</span>
+                                    <span data-value="3" class="star">&#9733;</span>
+                                    <span data-value="4" class="star">&#9733;</span>
+                                    <span data-value="5" class="star">&#9733;</span>
+                                </div>
+                                <!-- Labels dưới sao -->
+                                <div id="starLabels" style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top:5px;">
+                                    <span>Rất tệ</span>
+                                    <span>Không tệ</span>
+                                    <span>Trung bình</span>
+                                    <span>Tốt</span>
+                                    <span>Tuyệt vời</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <textarea name="Comment" class="form-control mt-2" placeholder="Viết nhận xét..." rows="4"></textarea>
+                        <button type="submit" class="btn btn-primary mt-3">Gửi đánh giá</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>

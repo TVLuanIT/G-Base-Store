@@ -20,3 +20,49 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+
+
+
+.star {
+    transition: color 0.2s;
+}
+.star.hover, .star.selected {
+    color: #ffca08; /* vàng */
+}
+#starRating {
+    display: flex;
+    gap: 50px; /* khoảng cách giữa các sao */
+    font-size: 2.2rem;
+    color: gray;
+    cursor: pointer;
+}
+#starLabels {
+    display: flex;
+    justify-content: space-between; /* căn đều các nhãn dưới sao */
+    font-size: 0.9rem; /* nhỏ hơn sao */
+    margin-top: 5px;
+}
+#starLabels span {
+    text-align: center;
+}
+
+
+
+.review-stats {
+    max-width: 800px; /* chiều rộng tối đa */
+    margin: 0 auto;   /* căn giữa */
+    padding: 20px;
+}
+.rating-breakdown .progress {
+    width: 100%;       /* chiếm hết width của cột chứa nó */
+    max-width: 800px;  /* hoặc cố định nếu muốn */
+    height: 12px;      /* chiều cao thanh */
+    background-color: #e0e0e0; /* màu nền thanh */
+    border-radius: 6px;
+}
+.rating-breakdown .progress-bar {
+    background-color: #ffca08; /* màu vàng */
+    /* KHÔNG đặt width cố định px, width sẽ được set bằng % trong Razor */
+}
