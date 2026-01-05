@@ -13,3 +13,6 @@ Release/
 # Others
 *.DS_Store
 *.env
+
+# ASP.NET Core specific
+appsettings.Development.json

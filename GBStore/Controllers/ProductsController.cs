@@ -19,6 +19,35 @@ namespace GBStore.Controllers
             _context = context;
         }
 
+        public IActionResult Search(string keyword)
+        {
+            // Bắt đầu query
+            var productsQuery = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Tag)
+                .AsQueryable();
+
+            // Nếu có keyword → lọc theo Product / Brand / Category / Tag
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                keyword = keyword.Trim().ToLower();
+
+                productsQuery = productsQuery.Where(p =>
+                    p.Name.ToLower().Contains(keyword) ||
+                    p.Brand.BrandName.ToLower().Contains(keyword) ||
+                    p.Category.CategoryName.ToLower().Contains(keyword) ||
+                    (p.Tag != null && p.Tag.TagName.ToLower().Contains(keyword))
+                );
+            }
+
+            var products = productsQuery.ToList();
+
+            ViewBag.Keyword = keyword;
+
+            return View(products);
+        }
+
         // Action hiển thị sản phẩm theo tag
         public IActionResult ProductsByTag(int id)
         {

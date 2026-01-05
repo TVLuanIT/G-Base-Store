@@ -10824,37 +10824,3 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
-
-.product-img-wrapper {
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-}
-
-.product-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.product-name {
-    color: #000;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.product-name:hover {
-    color: #dc3545;
-}
-
-.product-description {
-    padding-left: 20px; /* cách trái cho bullet */
-    margin: 0;
-}
-
-.product-description li::marker {
-    font-weight: bold;   /* làm dấu chấm đậm */
-    color: black;        /* màu dấu chấm */
-}
-
-

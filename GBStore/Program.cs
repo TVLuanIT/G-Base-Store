@@ -13,16 +13,23 @@ public class Program
         // Add services to the container.
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-        // using GbstoreContext for Identity and Product data
-        builder.Services.AddDbContext<GbstoreContext>(options =>
+        // using GbstoreContext for Database
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+        // using ApplicationDbContext for Identity
         builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<GbstoreContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
         builder.Services.AddControllersWithViews();
+        
+        // using GbstoreContext for Database
+        builder.Services.AddDbContext<GbstoreContext>(options =>
+            options.UseSqlServer(connectionString));
+
+        builder.Services.AddRazorPages();
 
         var app = builder.Build();
 

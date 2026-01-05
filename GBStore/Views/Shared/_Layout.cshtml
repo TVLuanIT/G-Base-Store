@@ -11,6 +11,7 @@
     <!-- Bootstrap icons-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="~/css/loginStyle.css" rel="stylesheet" />
     <link href="~/css/site.css" rel="stylesheet" />
     <link href="~/css/styles.css" rel="stylesheet" />
 
@@ -24,6 +25,12 @@
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form asp-controller="Products" asp-action="Search" method="get" class="d-flex me-3">
+                    <input class="form-control me-2" type="search" name="keyword" placeholder="Bạn muốn tìm gì nhỉ" aria-label="Search" value="@ViewBag.Keyword">
+                    <button class="btn btn-outline-dark" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" asp-controller="Home" asp-action="Index">Trang Chủ</a>
@@ -32,6 +39,16 @@
 					@await Component.InvokeAsync("CategoryMenu")
 					@await Component.InvokeAsync("TagMenu")
                 </ul>
+                <!-- LOGIN / REGISTER -->
+                <ul class="navbar-nav">
+                    <li>
+						<a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Đăng Nhập</a>
+                    </li>
+					<li>
+                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Đăng Ký</a>
+					</li>
+                </ul>
+                <!-- CART -->
                 <form class="d-flex">
                     <button class="btn btn-outline-dark" type="submit">
                         <i class="bi-cart-fill me-1"></i>
