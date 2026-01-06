@@ -39,15 +39,7 @@
 					@await Component.InvokeAsync("CategoryMenu")
 					@await Component.InvokeAsync("TagMenu")
                 </ul>
-                <!-- LOGIN / REGISTER -->
-                <ul class="navbar-nav">
-                    <li>
-						<a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Đăng Nhập</a>
-                    </li>
-					<li>
-                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Đăng Ký</a>
-					</li>
-                </ul>
+
                 <!-- CART -->
                 <form class="d-flex">
                     <button class="btn btn-outline-dark" type="submit">
@@ -56,6 +48,38 @@
                         <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
                     </button>
                 </form>
+
+                <!-- LOGIN / REGISTER -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            @if (User.Identity != null && User.Identity.IsAuthenticated)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-controller="MyAccount" asp-action="Index">My Account</a>
+                                </li>
+                                <li>
+                                    <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">Đăng Xuất</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">Đăng Nhập</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Đăng Ký</a>
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                </ul>
+
             </div>
         </div>
     </nav>

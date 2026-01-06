@@ -1,0 +1,38 @@
+﻿@model GBStore.Models.Customer
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2 class="mb-4">Thông tin tài khoản</h2>
+
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <div class="row mb-2">
+            <div class="col-4"><strong>Họ và tên:</strong></div>
+            <div class="col-8">@Model.Name</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-4"><strong>Email:</strong></div>
+            <div class="col-8">@Model.Email</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-4"><strong>Số điện thoại:</strong></div>
+            <div class="col-8">@Model.Phone</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-4"><strong>Địa chỉ:</strong></div>
+            <div class="col-8">@Model.CustomerAddress</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-4"><strong>Tài khoản:</strong></div>
+            <div class="col-8">@Model.NameAccount</div>
+        </div>
+    </div>
+</div>
+
+<a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.CustomerId">
+    <i class="bi bi-pencil"></i> Chỉnh sửa thông tin
+</a>
+
+<a asp-action="Edit" asp-controller="MyAccount" asp-route-id="@Model.CustomerId">Edit Profile</a>
