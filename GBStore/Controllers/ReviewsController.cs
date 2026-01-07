@@ -49,7 +49,7 @@ namespace GBStore.Controllers
         // GET: Reviews/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId");
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId");
             return View();
         }
@@ -67,7 +67,7 @@ namespace GBStore.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", review.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
             return View(review);
         }
@@ -85,7 +85,7 @@ namespace GBStore.Controllers
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", review.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
             return View(review);
         }
@@ -122,7 +122,7 @@ namespace GBStore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", review.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
             return View(review);
         }

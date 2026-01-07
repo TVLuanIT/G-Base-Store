@@ -22,7 +22,7 @@ public partial class ShoppingCart
 
     [ForeignKey("CustomerId")]
     [InverseProperty("ShoppingCarts")]
-    public virtual User Customer { get; set; } = null!;
+    public virtual Customer Customer { get; set; } = null!;
 
     [InverseProperty("ShoppingCart")]
     public virtual ICollection<ShoppingCartItem> ShoppingCartItems { get; set; } = new List<ShoppingCartItem>();

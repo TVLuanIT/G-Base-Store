@@ -48,7 +48,7 @@ namespace GBStore.Controllers
         // GET: ShoppingCarts/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId");
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace GBStore.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", shoppingCart.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", shoppingCart.CustomerId);
             return View(shoppingCart);
         }
 
@@ -82,7 +82,7 @@ namespace GBStore.Controllers
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", shoppingCart.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", shoppingCart.CustomerId);
             return View(shoppingCart);
         }
 
@@ -118,7 +118,7 @@ namespace GBStore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Users, "UserId", "UserId", shoppingCart.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", shoppingCart.CustomerId);
             return View(shoppingCart);
         }
 

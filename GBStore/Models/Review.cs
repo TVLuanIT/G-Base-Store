@@ -26,7 +26,7 @@ public partial class Review
 
     [ForeignKey("CustomerId")]
     [InverseProperty("Reviews")]
-    public virtual User Customer { get; set; } = null!;
+    public virtual Customer Customer { get; set; } = null!;
 
     [ForeignKey("ProductId")]
     [InverseProperty("Reviews")]

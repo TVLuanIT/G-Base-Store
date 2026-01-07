@@ -7,12 +7,15 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using GBStore.Data;
+using GBStore.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GBStore.Areas.Identity.Pages.Account
@@ -21,11 +24,13 @@ namespace GBStore.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly GbstoreContext _context;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger, GbstoreContext context)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -115,6 +120,28 @@ namespace GBStore.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    // Lấy thông tin IdentityUser
+                    var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+
+                    // Kiểm tra xem Customer đã tồn tại chưa
+                    var customer = await _context.Customers
+                                                 .FirstOrDefaultAsync(c => c.Email == user.Email || c.NameAccount == user.UserName);
+                    if (customer == null)
+                    {
+                        // Nếu chưa có thì tạo mới
+                        _context.Customers.Add(new Customer
+                        {
+                            NameAccount = user.UserName, // tạm thời trùng UserName
+                            Name = user.UserName,        // tạm thời trùng NameAccount
+                            Email = user.Email,
+                            Phone = null,
+                            CustomerAddress = null
+                        });
+
+                        await _context.SaveChangesAsync();
+                    }
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
