@@ -27,7 +27,7 @@ namespace GBStore.Controllers
 
             if (string.IsNullOrEmpty(nameAccount))
             {
-                return RedirectToPage("/Account/Login", new { area = "Identity" });
+                return RedirectToAction("/Account/Login", new { area = "Identity" });
             }
 
             // Lưu ý: await ở đây cần async method
