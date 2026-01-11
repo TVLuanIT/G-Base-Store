@@ -79,11 +79,20 @@
                            min="1"
                            style="max-width: 4rem" />
 
-                    <button class="btn btn-outline-dark flex-shrink-0" type="button">
+                    <a id="btnAddToCart"
+                       class="btn btn-outline-dark flex-shrink-0"
+                       href="#">
                         <i class="bi-cart-fill me-1"></i>
                         Thêm vào giỏ hàng
-                    </button>
+                    </a>
                 </div>
+                <script>
+                    document.getElementById("btnAddToCart").addEventListener("click", function () {
+                        var qty = document.getElementById("inputQuantity").value;
+                        var url = '@Url.Action("AddToCart", "ShoppingCarts")' + '?productId=@Model.ProductId&quantity=' + qty;
+                        window.location.href = url;
+                    });
+                </script>
             </div>
         </div>
     </div>

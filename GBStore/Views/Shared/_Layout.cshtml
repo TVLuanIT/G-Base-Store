@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using GBStore.Models
+@using GBStore.Data
+@inject GbstoreContext _context
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -41,13 +45,33 @@
                 </ul>
 
                 <!-- CART -->
-                <form class="d-flex">
-                    <button class="btn btn-outline-dark" type="submit">
-                        <i class="bi-cart-fill me-1"></i>
-                        Cart
-                        <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-                    </button>
-                </form>
+                @{
+                    int cartCount = 0;
+
+                    if (User.Identity!.IsAuthenticated)
+                    {
+                        var customerIdClaim = User.FindFirst("CustomerId");
+
+                        if (customerIdClaim != null)
+                        {
+                            int customerId = int.Parse(customerIdClaim.Value);
+
+                            cartCount = _context.ShoppingCartItems
+                            .Where(x => x.ShoppingCart.Customer.CustomerId == customerId &&
+                            x.ShoppingCart.ShoppingCartStatus == "ACTIVE")
+                            .Sum(x => (int?)x.Quantity) ?? 0;
+                        }
+                    }
+                }
+                <a asp-controller="ShoppingCarts"
+                   asp-action="Index"
+                   class="btn btn-outline-dark">
+                    <i class="bi-cart-fill me-1"></i>
+                    Cart
+                    <span class="badge bg-dark text-white ms-1 rounded-pill">
+                        @cartCount
+                    </span>
+                </a>
 
                 <!-- LOGIN / REGISTER -->
                 <ul class="navbar-nav ms-auto">

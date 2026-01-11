@@ -29,6 +29,9 @@ public partial class Customer
     [StringLength(100)]
     public string? NameAccount { get; set; }
 
+    [StringLength(255)]
+    public string? Avatar { get; set; }
+
     [InverseProperty("Customer")]
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 

@@ -139,6 +139,13 @@ namespace GBStore.Areas.Identity.Pages.Account
                     _context.Customers.Add(customer);
                     await _context.SaveChangesAsync();
 
+                    // Lấy ID của customer vừa tạo
+                    var customerId = customer.CustomerId.ToString();
+                    // Thêm claim CustomerId vào user
+                    await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("CustomerId", customerId));
+                    // 3. SignIn user ngay lập tức
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

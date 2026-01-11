@@ -127,6 +127,8 @@ namespace GBStore.Areas.Identity.Pages.Account
                     // Kiểm tra xem Customer đã tồn tại chưa
                     var customer = await _context.Customers
                                                  .FirstOrDefaultAsync(c => c.Email == user.Email || c.NameAccount == user.UserName);
+
+
                     if (customer == null)
                     {
                         // Nếu chưa có thì tạo mới
@@ -141,6 +143,16 @@ namespace GBStore.Areas.Identity.Pages.Account
 
                         await _context.SaveChangesAsync();
                     }
+
+                    // --- Thêm claim CustomerId ---
+                    var claims = await _signInManager.UserManager.GetClaimsAsync(user);
+                    if (!claims.Any(c => c.Type == "CustomerId"))
+                    {
+                        await _signInManager.UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("CustomerId", customer.CustomerId.ToString()));
+                    }
+
+                    // --- Đăng nhập user (SignInAsync) để claim có sẵn trong cookie ---
+                    await _signInManager.SignInAsync(user, Input.RememberMe);
 
                     return LocalRedirect(returnUrl);
                 }
