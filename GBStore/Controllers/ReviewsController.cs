@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using GBStore.Data;
 using GBStore.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 
 namespace GBStore.Controllers
 {
     public class ReviewsController : Controller
     {
         private readonly GbstoreContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public ReviewsController(GbstoreContext context)
+        public ReviewsController(GbstoreContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Reviews
@@ -46,103 +52,91 @@ namespace GBStore.Controllers
             return View(review);
         }
 
-        // GET: Reviews/Create
-        public IActionResult Create()
-        {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId");
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId");
-            return View();
-        }
-
         // POST: Reviews/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ReviewId,CustomerId,ProductId,Rating,Comment,CreatedDate")] Review review)
+        public async Task<IActionResult> AddCustomerReview(int productId, int rating, string comment)
         {
-            if (ModelState.IsValid)
+            var customerId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy CustomerId từ login
+            if (customerId == null)
             {
-                _context.Add(review);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Unauthorized();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
-            return View(review);
+
+            var review = new Review
+            {
+                ProductId = productId,
+                CustomerId = customerId,
+                Rating = rating,
+                Comment = comment,
+                CreatedDate = DateTime.Now
+            };
+
+            _context.Reviews.Add(review);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Home", new { id = productId });
         }
 
         // GET: Reviews/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var review = await _context.Reviews.FindAsync(id);
-            if (review == null)
-            {
-                return NotFound();
-            }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
+            var review = await _context.Reviews
+                .Include(r => r.Customer)
+                .Include(r => r.Product)
+                .FirstOrDefaultAsync(r => r.ReviewId == id);
+
+            if (review == null) return NotFound();
+
+            // chỉ cho phép chủ review chỉnh sửa
+            var userId = _userManager.GetUserId(User);
+            if (review.CustomerId != userId) return Forbid();
+
             return View(review);
         }
 
         // POST: Reviews/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,CustomerId,ProductId,Rating,Comment,CreatedDate")] Review review)
+        public async Task<IActionResult> Edit(int id, [Bind("ReviewId,ProductId,Rating,Comment")] Review editedReview)
         {
-            if (id != review.ReviewId)
-            {
-                return NotFound();
-            }
+            if (id != editedReview.ReviewId) return NotFound();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(review);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ReviewExists(review.ReviewId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", review.CustomerId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", review.ProductId);
-            return View(review);
+            var review = await _context.Reviews.FindAsync(id);
+            if (review == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (review.CustomerId != userId) return Forbid();
+
+            review.Rating = editedReview.Rating;
+            review.Comment = editedReview.Comment;
+            review.CreatedDate = DateTime.Now; // hoặc giữ ngày tạo cũ nếu muốn
+
+            _context.Update(review);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Home", new { id = review.ProductId });
         }
 
         // GET: Reviews/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var review = await _context.Reviews
                 .Include(r => r.Customer)
                 .Include(r => r.Product)
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (review == null)
-            {
-                return NotFound();
-            }
+                .FirstOrDefaultAsync(r => r.ReviewId == id);
+
+            if (review == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (review.CustomerId != userId) return Forbid();
 
             return View(review);
         }
@@ -153,18 +147,15 @@ namespace GBStore.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
-            {
-                _context.Reviews.Remove(review);
-            }
+            if (review == null) return NotFound();
 
+            var userId = _userManager.GetUserId(User);
+            if (review.CustomerId != userId) return Forbid();
+
+            _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool ReviewExists(int id)
-        {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+            return RedirectToAction("Details", "Home", new { id = review.ProductId });
         }
     }
 }
