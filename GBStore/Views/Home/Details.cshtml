@@ -1,4 +1,5 @@
 ﻿@using GBStore.Extensions
+@using System.Security.Claims
 @model GBStore.Models.Product
 
 @{
@@ -99,87 +100,144 @@
 
     <br />
 
-    <div class="d-flex justify-content-center align-items-start gap-4 mb-3">
-        <!-- Cột trái: Điểm trung bình + sao -->
-        <div class="avg-score text-center">
-            <div class="avg-value mb-2">
-                <h2 class="mb-0">
-                    @(Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating).ToString("0.0") : "0.0")
-                </h2>
-                <small>Đánh giá trung bình</small>
-            </div>
-            <div class="avg-stars" style="color:#ffca08; font-size:1.8rem;">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    if (i <= (Model.Reviews.Any() ? Math.Round(Model.Reviews.Average(r => r.Rating)) : 0))
-                    {
-                        <span>&#9733;</span>
-                    }
-                    else
-                    {
-                        <span style="color:lightgray">&#9733;</span>
-                    }
-                }
-            </div>
-        </div>
+    @{
+        var reviews = Model.Reviews ?? new List<Review>();
 
-        <!-- Cột phải: Thống kê từng sao -->
-        <div class="rating-breakdown text-start" style="min-width:500px; max-width:700px;">
-            @for (int star = 5; star >= 1; star--)
-            {
-                var count = Model.Reviews.Count(r => r.Rating == star);
-                var total = Model.Reviews.Count();
-                var percent = total > 0 ? (count * 100 / total) : 0;
-
-                <div class="d-flex align-items-center mb-1">
-                    <span class="me-2" style="width:20px;">@star</span>
-                    <span class="me-2">&#9733;</span>
-
-                    <!-- progress bar -->
-                    <div class="progress flex-grow-1 me-2" style="height:12px;">
-                        <div class="progress-bar" role="progressbar"
-                             style=@($"width:{(percent > 0 ? percent : 1)}%")
-                             aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
-                        </div>
-                    </div>
-
-                    <span class="rating-count flex-shrink-0" style="white-space:nowrap;">
-                        @percent% | @count đánh giá
-                    </span>
-                </div>
-            }
-        </div>
-
-        <div style="height:100%;" class="d-flex justify-content-center mt-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal" style="width:100%">
-                Đánh Giá Ngay
-            </button>
-        </div>
-
-    </div>
-
-    @if (Model.Reviews.Any())
-    {
-        @foreach (var review in Model.Reviews)
-        {
-            <div class="review border p-2 mb-2 rounded" style="display:block">
-                <strong>@review.Customer.Name</strong> -
-                @for (int i = 1; i <= 5; i++)
-                {
-                    if (i <= review.Rating)
-                    {
-                        <span style="color:#ffca08">&#9733;</span>
-                    }
-                    else
-                    {
-                        <span style="color:lightgray">&#9733;</span>
-                    }
-                }
-                <p>@review.Comment</p>
-                <small>@review.CreatedDate?.ToString("dd/MM/yyyy")</small>
-            </div>
-        }
+        decimal avgRating = reviews.Any()
+            ? reviews.Average(r => r.Rating)
+            : 0m;
     }
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Cột thống kê + rating breakdown (giữ nguyên) -->
+            <div class="col-md-4">
+                <!-- Avg score -->
+                <div class="avg-score text-center mb-3">
+                    <div class="avg-value mb-2">
+                        <h2 class="mb-0">
+                            @avgRating.ToString("0.0")
+                        </h2>
+                        <small>Đánh giá trung bình</small>
+                    </div>
+                    <div class="avg-stars" style="color:#ffca08; font-size:1.8rem;">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Floor((double)avgRating))
+                            {
+                                <span>&#9733;</span>   <!-- full star -->
+                            }
+                            else if (i - avgRating <= 0.5m)
+                            {
+                                <span>&#9734;</span>   <!-- half star -->
+                            }
+                            else
+                            {
+                                <span style="color:lightgray">&#9733;</span> <!-- empty star -->
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Rating breakdown -->
+                <div class="rating-breakdown mb-3 text-start">
+                    @for (int star = 5; star >= 1; star--)
+                    {
+                        var count = reviews.Count(r => r.Rating == star);
+                        var total = reviews.Count();
+                        var percent = total > 0 ? (count * 100.0 / total) : 0;
+
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="me-2" style="width:20px;">@star</span>
+                            <span class="me-2">&#9733;</span>
+
+                            <div class="progress flex-grow-1 me-2" style="height:12px;">
+                                <div class="progress-bar" role="progressbar"
+                                     style=@($"width:{percent}%")
+                                     aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+
+                            <span class="rating-count flex-shrink-0" style="white-space:nowrap;">
+                                @percent% | @count đánh giá
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Button -->
+                <div class="text-center">
+                    <button type="button" id="btnOpenReview" class="btn btn-primary w-100"
+                            data-user-auth="@(User.Identity?.IsAuthenticated ?? false)">
+                        Đánh Giá Ngay
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- Cột đánh giá (review list) -->
+            <div class="col-md-8">
+                <h4>Đánh giá sản phẩm</h4>
+
+                @if (Model.Reviews?.Any() == true)
+                {
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div class="review-card mb-3 p-3 border rounded position-relative">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <strong>@review.Customer.UserName</strong>
+                                    <span>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <span style="color:#ffca08">&#9733;</span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:lightgray">&#9733;</span>
+                                            }
+                                        }
+                                    </span>
+                                </div>
+
+                                @* Chỉ hiển thị menu 3 chấm nếu là chủ review *@
+                                @if (User?.Identity?.IsAuthenticated == true 
+                                     && review.CustomerId != null 
+                                     && review.CustomerId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                                                id="reviewMenu@review.ReviewId" data-bs-toggle="dropdown" aria-expanded="false">
+                                            &#x22EE; @* ký hiệu 3 chấm dọc *@
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="reviewMenu@review.ReviewId">
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Reviews" asp-action="Edit" asp-route-id="@review.ReviewId">Chỉnh sửa</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-controller="Reviews" asp-action="Delete" asp-route-id="@review.ReviewId">Xóa</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+
+                            <p class="mb-1">@review.Comment</p>
+                            <small class="text-muted">@($"({review.Rating}/5 sao) - {review.CreatedDate:dd/MM/yyyy}")</small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="text-align:left; color:#666; font-style:italic; margin-top:20px;">
+                        Chưa có đánh giá nào cho sản phẩm này.
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
 
     <!-- Modal -->
     <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
@@ -191,29 +249,27 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form asp-action="Create" method="post" id="reviewForm">
-                        <input type="hidden" name="ProductId" value="@Model.ProductId" />
-                        <input type="hidden" name="CustomerId" value="@User.FindFirst("UserId")?.Value" />
-                        <input type="hidden" name="Rating" id="ratingValue" value="0" /> <!-- Giá trị rating -->
+                    <form asp-controller="Reviews" asp-action="AddCustomerReview" method="post" id="reviewForm">
+                        <input type="hidden" name="productId" value="@Model.ProductId" />
+                        <input type="hidden" name="rating" id="ratingValue" value="0" />
                         
                         <!-- Container label + stars -->
-                        <div style="display:flex; align-items:center; margin-bottom:10px;">
-                            <!-- Label bên trái -->
-                            <label style="margin-right:50px; white-space:nowrap;">
+                        <div style="display:flex; flex-direction: column; margin-bottom:20px;">
+                            <!-- Label bên trên -->
+                            <label style="margin-bottom:10px;">
                                 Bạn cảm thấy thế nào về sản phẩm nhỉ?
                             </label>
 
                             <!-- Star rating + text dưới sao -->
-                            <div id="starRatingContainer" style="text-align:center;">
-                                <div id="starRating" style="font-size:2.2rem; color:gray; cursor:pointer;">
+                            <div id="starRatingContainer">
+                                <div id="starRating">
                                     <span data-value="1" class="star">&#9733;</span>
                                     <span data-value="2" class="star">&#9733;</span>
                                     <span data-value="3" class="star">&#9733;</span>
                                     <span data-value="4" class="star">&#9733;</span>
                                     <span data-value="5" class="star">&#9733;</span>
                                 </div>
-                                <!-- Labels dưới sao -->
-                                <div id="starLabels" style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top:5px;">
+                                <div id="starLabels">
                                     <span>Rất tệ</span>
                                     <span>Không tệ</span>
                                     <span>Trung bình</span>
@@ -223,7 +279,7 @@
                             </div>
                         </div>
 
-                        <textarea name="Comment" class="form-control mt-2" placeholder="Viết nhận xét..." rows="4"></textarea>
+                        <textarea name="comment" class="form-control mt-2" placeholder="Viết nhận xét..." rows="4"></textarea>
                         <button type="submit" class="btn btn-primary mt-3">Gửi đánh giá</button>
                     </form>
                 </div>
@@ -232,3 +288,17 @@
     </div>
 
 </section>
+
+<script>
+    document.getElementById("btnOpenReview").addEventListener("click", function() {
+        const isAuth = this.getAttribute("data-user-auth") === "True";
+        if (!isAuth) {
+            // Redirect đến login nếu chưa login
+            window.location.href = "/Identity/Account/Login?returnUrl=" + encodeURIComponent(window.location.pathname);
+        } else {
+            // Mở modal nếu đã login
+            const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            reviewModal.show();
+        }
+    });
+</script>

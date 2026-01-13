@@ -38,6 +38,8 @@ namespace GBStore.Controllers
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.Tag)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.Customer)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
             {
