@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using GBStore.Data;
 using GBStore.Models;
@@ -22,109 +23,79 @@ namespace GBStore.Controllers
             _context = context;
         }
 
+        private async Task<Customer?> GetCurrentCustomer()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return null;
+
+            return await _context.Customers
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+        }
+
         // GET: /ShoppingCarts/Payment
         [HttpGet]
         public async Task<IActionResult> Payment()
         {
-            var customerIdClaim = User.FindFirst("CustomerId");
-            if (customerIdClaim == null)
-            {
-                return RedirectToAction("Index", "ShoppingCartItems");
-            }
-
-            int customerId = int.Parse(customerIdClaim.Value);
+            var customer = await GetCurrentCustomer();
+            if (customer == null)
+                return Redirect("/Identity/Account/Login");
 
             var cart = await _context.ShoppingCarts
                 .Include(c => c.ShoppingCartItems)
                     .ThenInclude(i => i.Product)
-                .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.ShoppingCartStatus == "ACTIVE");
+                .FirstOrDefaultAsync(c =>
+                    c.CustomerId == customer.CustomerId &&
+                    c.ShoppingCartStatus == "ACTIVE");
 
             if (cart == null)
-            {
                 return RedirectToAction("Index", "ShoppingCartItems");
-            }
-            
 
-            var customer = await _context.Customers.FindAsync(customerId);
-            if (customer != null)
-            {
-                ViewBag.CustomerFullName = customer.Name;
-                ViewBag.CustomerPhone = customer.Phone;
-                ViewBag.CustomerAddress = customer.CustomerAddress;
-                ViewBag.CustomerNote = "";
-            }
+            ViewBag.CustomerFullName = customer.Name;
+            ViewBag.CustomerPhone = customer.Phone;
+            ViewBag.CustomerAddress = customer.CustomerAddress;
+            ViewBag.CustomerNote = "";
 
             return View(cart);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Payment(int shoppingCartId, string fullName, string phone, string address, string note)
+        public async Task<IActionResult> Payment(
+            int shoppingCartId,
+            string fullName,
+            string phone,
+            string address,
+            string note)
         {
-            var customerIdClaim = User.FindFirst("CustomerId");
-            if (customerIdClaim == null)
-            {
-                return RedirectToAction("Index", "ShoppingCartItems");
-            }
-
-            int customerId = int.Parse(customerIdClaim.Value);
+            var customer = await GetCurrentCustomer();
+            if (customer == null)
+                return Redirect("/Identity/Account/Login");
 
             var cart = await _context.ShoppingCarts
                 .Include(c => c.ShoppingCartItems)
                     .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c =>
                     c.ShoppingCartId == shoppingCartId &&
-                    c.CustomerId == customerId &&
+                    c.CustomerId == customer.CustomerId &&
                     c.ShoppingCartStatus == "ACTIVE");
 
             if (cart == null || !cart.ShoppingCartItems.Any())
             {
-                ViewBag.CartError = "Giỏ hàng của bạn hiện tại không có sản phẩm nào.";
-                return View(new ShoppingCart { ShoppingCartItems = new List<ShoppingCartItem>() });
-            }
-
-            //Kiểm tra thông tin bắt buộc
-            if (string.IsNullOrWhiteSpace(fullName) ||
-                string.IsNullOrWhiteSpace(phone) ||
-                string.IsNullOrWhiteSpace(address))
-            {
-                // Trả về lại view Payment với thông báo lỗi
-                ModelState.AddModelError("", "Vui lòng nhập đầy đủ thông tin trước khi thanh toán.");
-                ViewBag.CustomerFullName = fullName;
-                ViewBag.CustomerPhone = phone;
-                ViewBag.CustomerAddress = address;
-                ViewBag.CustomerNote = note;
+                ViewBag.CartError = "Giỏ hàng trống.";
                 return View(cart);
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.CustomerId == customerId);
+            // Cập nhật thông tin Customer
+            customer.Name ??= fullName;
+            customer.Phone ??= phone;
+            customer.CustomerAddress ??= address;
+            await _context.SaveChangesAsync();
 
-            if (customer != null)
-            {
-                if (string.IsNullOrWhiteSpace(customer.Name))
-                {
-                    customer.Name = fullName;
-                }
-
-                if (string.IsNullOrWhiteSpace(customer.Phone))
-                {
-                    customer.Phone = phone;
-                }
-
-                if (string.IsNullOrWhiteSpace(customer.CustomerAddress))
-                {
-                    customer.CustomerAddress = address;
-                }
-
-                _context.Customers.Update(customer);
-                await _context.SaveChangesAsync();
-            }
-
-            // 1️ Tạo Order
+            // 🔹 Tạo Order
             var order = new Order
             {
-                CustomerId = customerId,
+                CustomerId = customer.CustomerId,
                 CustomerName = fullName,
                 Phone = phone,
                 ShippingAddress = address,
@@ -137,7 +108,7 @@ namespace GBStore.Controllers
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            // 2️ Tạo OrderDetails
+            // 🔹 OrderDetails
             foreach (var item in cart.ShoppingCartItems)
             {
                 _context.OrderDetails.Add(new OrderDetail
@@ -148,11 +119,11 @@ namespace GBStore.Controllers
                     Price = item.Product.Price
                 });
             }
-            await _context.SaveChangesAsync(); // Lưu tất cả chi tiết đơn hàng
 
-            // 3️ Đóng cart
+            await _context.SaveChangesAsync();
+
+            // 🔹 Đóng cart
             cart.ShoppingCartStatus = "CHECKED_OUT";
-            _context.ShoppingCartItems.RemoveRange(cart.ShoppingCartItems);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("OrderSuccess", "Orders", new { orderId = order.OrderId });
@@ -160,31 +131,27 @@ namespace GBStore.Controllers
 
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
-            var customerIdClaim = User.FindFirst("CustomerId");
-            if (customerIdClaim == null)
+            // Lấy Customer thực tế
+            var customer = await GetCurrentCustomer();
+            if (customer == null)
                 return Redirect("/Identity/Account/Login");
 
-            if (!int.TryParse(customerIdClaim.Value, out int customerId))
-            {
-                return Redirect("/Identity/Account/Login");
-            }
-
-            // 🔹 Kiểm tra quantity hợp lệ
+            // Kiểm tra quantity hợp lệ
             if (quantity < 1)
-            {
                 quantity = 1;
-            }
 
             // Lấy giỏ hàng ACTIVE
             var cart = await _context.ShoppingCarts
                 .Include(c => c.ShoppingCartItems)
-                .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.ShoppingCartStatus == "ACTIVE");
+                .FirstOrDefaultAsync(c =>
+                    c.CustomerId == customer.CustomerId &&
+                    c.ShoppingCartStatus == "ACTIVE");
 
             if (cart == null)
             {
                 cart = new ShoppingCart
                 {
-                    CustomerId = customerId,
+                    CustomerId = customer.CustomerId,
                     ShoppingCartStatus = "ACTIVE",
                     CreatedDate = DateTime.Now
                 };
@@ -196,42 +163,49 @@ namespace GBStore.Controllers
             var item = cart.ShoppingCartItems.FirstOrDefault(i => i.ProductId == productId);
             if (item == null)
             {
-                // Chưa có → thêm mới
                 cart.ShoppingCartItems.Add(new ShoppingCartItem
                 {
                     ProductId = productId,
                     Quantity = quantity
                 });
             }
+            else
+            {
+                // Nếu đã có, cộng dồn số lượng
+                item.Quantity += quantity;
+            }
 
             await _context.SaveChangesAsync();
 
-            // Redirect về giỏ hàng
+            // Redirect về chi tiết sản phẩm hoặc giỏ hàng
             return RedirectToAction("Details", "Home", new { id = productId });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateQuantity(int productId, int quantity, string returnUrl)
+        public async Task<IActionResult> UpdateQuantity(int productId, int quantity, string returnUrl)
         {
-            var customerIdClaim = User.FindFirst("CustomerId");
-            if (customerIdClaim == null)
+            // 1️⃣ Lấy Customer hiện tại từ Identity
+            var customer = await GetCurrentCustomer();
+            if (customer == null)
                 return Redirect("/Identity/Account/Login");
 
-            if (!int.TryParse(customerIdClaim.Value, out int customerId))
-                return Redirect("/Identity/Account/Login");
+            // 2️⃣ Lấy ShoppingCartItem của khách hàng, cart ACTIVE
+            var item = await _context.ShoppingCartItems
+                .Include(i => i.ShoppingCart)
+                .FirstOrDefaultAsync(i =>
+                    i.ProductId == productId &&
+                    i.ShoppingCart.CustomerId == customer.CustomerId &&
+                    i.ShoppingCart.ShoppingCartStatus == "ACTIVE");
 
-            var item = _context.ShoppingCartItems
-                .FirstOrDefault(i => i.ProductId == productId &&
-                                     i.ShoppingCart.CustomerId == customerId &&
-                                     i.ShoppingCart.ShoppingCartStatus == "ACTIVE");
-
+            // 3️⃣ Cập nhật số lượng
             if (item != null && quantity > 0)
             {
                 item.Quantity = quantity;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
+            // 4️⃣ Redirect
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
 

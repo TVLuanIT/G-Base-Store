@@ -1,0 +1,54 @@
+﻿@model IEnumerable<GBStore.Models.OrderDetail>
+
+@{
+    ViewBag.Title = "Chi tiết đơn hàng";
+}
+
+@{
+    var firstItem = Model?.FirstOrDefault();
+}
+
+<h2>
+    Chi tiết đơn hàng
+    @if (firstItem != null)
+    {
+        <span>#@firstItem.OrderId</span>
+    }
+</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        Đơn hàng không có sản phẩm nào.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Product?.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@(item.Quantity* item.Price).ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-controller="Orders"
+   asp-action="MyOrders"
+   class="btn btn-secondary">
+    Quay lại danh sách đơn hàng
+</a>
