@@ -1,0 +1,105 @@
+﻿@using GBStore.Extensions;
+@model GBStore.Models.ShoppingCart
+
+<body class="payment-page">
+    <div class="container payment-container mt-4 p-0">
+        <div class="row px-md-4 px-2 pt-4">
+            <!-- Order List -->
+            <div class="col-lg-8">
+                <p class="pb-2 fw-bold">Sản phẩm</p>
+                <div class="card">
+                    <div class="table-responsive px-md-4 px-2 pt-3">
+                        <table class="table table-borderless">
+                            <tbody>
+                                @foreach (var item in Model.ShoppingCartItems)
+                                {
+                                    <tr class="border-bottom">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <img class="img-fluid" style="max-width: 50px; max-height: 70px; border-radius:5px;"
+                                                         src="@item.Product.GetImagePath()"
+                                                         alt="@item.Product.Name" />
+                                                </div>
+                                                <div class="ps-3 d-flex flex-column">
+                                                    <p class="fw-bold">@item.Product.Name</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <p class="pe-3"><span class="red">@((item.Product.Price).ToString("N0")) ₫</span></p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="pe-3 text-muted">Số lượng</span>
+                                                <span class="pe-3">@item.Quantity</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Summary & Form -->
+            <div class="col-lg-4 payment-summary">
+                <p class="fw-bold pt-lg-0 pt-4 pb-2">Thanh toán</p>
+                <div class="card px-md-3 px-2 pt-4">
+                    <form asp-controller="ShoppingCarts" asp-action="Payment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="shoppingCartId" value="@Model.ShoppingCartId" />
+
+                        <!-- Auto-fill customer info -->
+                        <div class="mb-3">
+                            <label>Họ và tên</label>
+                            <input class="form-control" name="fullName" value="@ViewBag.CustomerFullName" required />
+                        </div>
+                        <div class="mb-3">
+                            <label>Số điện thoại</label>
+                            <input class="form-control" name="phone" value="@ViewBag.CustomerPhone" required />
+                        </div>
+                        <div class="mb-3">
+                            <label>Địa chỉ</label>
+                            <input class="form-control" name="address" value="@ViewBag.CustomerAddress" required />
+                        </div>
+                        <div class="mb-3">
+                            <label>Ghi chú - Nếu có điều cần lưu ý khi giao sản phẩm cho bạn</label>
+                            <textarea class="form-control" name="note">@ViewBag.CustomerNote</textarea>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="d-flex justify-content-between py-2">
+                            <span>Tổng tiền - Chưa tính phí dịch vụ</span>
+                            <span>@(Model.ShoppingCartItems.Sum(i => (i.Quantity ?? 0) * i.Product.Price).ToString("N0")) ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span>Phí dịch vụ</span>
+                            <span>@(0.ToString("N0")) ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold py-3">
+                            <span>Tổng tiền</span>
+                            <span>@((Model.ShoppingCartItems.Sum(i => (i.Quantity ?? 0) * i.Product.Price) + 0).ToString("N0")) ₫</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Đặt hàng</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Nút xem giỏ hàng -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <a asp-controller="ShoppingCarts" asp-action="Index"
+                       class="btn btn-primary btn-lg shadow-sm text-uppercase"
+                       style="letter-spacing:1px; padding: 10px 30px; display: inline-block; transition: 0.3s;">
+						Xem giỏ hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
