@@ -1,47 +1,60 @@
-﻿@model IEnumerable<GBStore.Models.ShoppingCartItem>
+﻿@using GBStore.Extensions
+@model IEnumerable<GBStore.Models.ShoppingCartItem>
 
-@{
-    ViewData["Title"] = "Index";
+@if (Model != null && Model.Any())
+{
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 mt-5">
+            <!-- Danh sách sản phẩm -->
+            <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 justify-content-center">
+                @foreach (var item in Model)
+                {
+                    <div class="col mb-5">
+                        <div class="card h-100 d-flex flex-column">
+                            <!-- Product image-->
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@item.ProductId">
+                                <img class="card-img-top" src="@item.Product.GetImagePath()" alt="@item.Product.Name" />
+                            </a>
+
+                            <!-- Product details & actions -->
+                            <div class="card-body text-center d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="card-body p-4">
+                                        <div class="text-center">
+                                            <p class="fw-bolder">@item.Product.Category.CategoryName</p>
+                                            <span class="fw-bold text-danger">
+                                                @item.Product.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) ₫
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                                        <div class="text-center">
+                                            <a asp-controller="Home" asp-action="Details" asp-route-id="@item.ProductId" class="product-name">
+                                                @item.Product.Name
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form asp-controller="ShoppingCartItems"
+                                      asp-action="RemoveFromCart"
+                                      method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "ShoppingCartItems")" />
+                                    <button type="submit" class="btn btn-danger w-100 mt-2">
+                                        Xóa sản phẩm
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
 }
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Quantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Product)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ShoppingCart)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ShoppingCart.ShoppingCartId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ShoppingCartItemId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ShoppingCartItemId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ShoppingCartItemId">Delete</a>
-            </td>
-        </tr>
+else
+{
+    <p>Không có sản phẩm nào trong giỏ hàng</p>
 }
-    </tbody>
-</table>

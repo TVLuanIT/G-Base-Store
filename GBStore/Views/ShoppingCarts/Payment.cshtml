@@ -8,40 +8,78 @@
             <div class="col-lg-8">
                 <p class="pb-2 fw-bold">Sản phẩm</p>
                 <div class="card">
-                    <div class="table-responsive px-md-4 px-2 pt-3">
-                        <table class="table table-borderless">
-                            <tbody>
-                                @foreach (var item in Model.ShoppingCartItems)
-                                {
-                                    <tr class="border-bottom">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <img class="img-fluid" style="max-width: 50px; max-height: 70px; border-radius:5px;"
-                                                         src="@item.Product.GetImagePath()"
-                                                         alt="@item.Product.Name" />
+                    @if (ViewBag.CartError != null)
+                    {
+                        <div class="alert alert-warning">
+                            @ViewBag.CartError
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive px-md-4 px-2 pt-3">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    @foreach (var item in Model.ShoppingCartItems)
+                                    {
+                                        <tr class="border-bottom">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img class="img-fluid" style="max-width: 50px; max-height: 70px; border-radius:5px;"
+                                                             src="@item.Product.GetImagePath()"
+                                                             alt="@item.Product.Name" />
+                                                    </div>
+                                                    <div class="ps-3 d-flex flex-column">
+                                                        <p class="fw-bold">@item.Product.Name</p>
+                                                    </div>
                                                 </div>
-                                                <div class="ps-3 d-flex flex-column">
-                                                    <p class="fw-bold">@item.Product.Name</p>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex">
+                                                    <p class="pe-3"><span class="red">@((item.Product.Price).ToString("N0")) ₫</span></p>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <p class="pe-3"><span class="red">@((item.Product.Price).ToString("N0")) ₫</span></p>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <span class="pe-3 text-muted">Số lượng</span>
-                                                <span class="pe-3">@item.Quantity</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <form asp-controller="ShoppingCarts"
+                                                          asp-action="UpdateQuantity"
+                                                          method="post"
+                                                          class="d-flex align-items-center">
+                                                        @Html.AntiForgeryToken()
+
+                                                        <input type="hidden" name="productId" value="@item.ProductId" />
+
+                                                        <input type="number"
+                                                               name="quantity"
+                                                               value="@item.Quantity"
+                                                               min="1"
+                                                               class="form-control form-control-sm text-center"
+                                                               style="width: 70px;"
+                                                               onchange="this.form.submit()" />
+                                                    </form>
+                                                </div>
+                                            </td>
+                                            <td class="text-end">
+                                                <form asp-controller="ShoppingCartItems"
+                                                      asp-action="RemoveFromCart"
+                                                      method="post">
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Payment", "ShoppingCarts")" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-outline-danger btn-sm">
+                                                        Xóa
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -85,7 +123,11 @@
                             <span>@((Model.ShoppingCartItems.Sum(i => (i.Quantity ?? 0) * i.Product.Price) + 0).ToString("N0")) ₫</span>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Đặt hàng</button>
+                        <button type="submit"
+                                class="btn btn-primary w-100"
+                                @(Model.ShoppingCartItems.Any() ? "" : "disabled")>
+                            Đặt hàng
+                        </button>
                     </form>
                 </div>
             </div>
@@ -93,7 +135,7 @@
             <!-- Nút xem giỏ hàng -->
             <div class="row mb-4">
                 <div class="col-12 text-center">
-                    <a asp-controller="ShoppingCarts" asp-action="Index"
+                    <a asp-controller="ShoppingCartItems" asp-action="Index"
                        class="btn btn-primary btn-lg shadow-sm text-uppercase"
                        style="letter-spacing:1px; padding: 10px 30px; display: inline-block; transition: 0.3s;">
 						Xem giỏ hàng
