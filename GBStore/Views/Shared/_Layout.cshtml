@@ -20,6 +20,7 @@
     <link href="~/css/styles.css" rel="stylesheet" />
     <link href="~/css/product_reviewStyle.css" rel="stylesheet"/>
     <link href="~/css/paymen_style.css" rel="stylesheet"/>
+    <link href="~/css/orderdetails_template.css" rel="stylesheet"/>
 
 </head>
 <body>
@@ -91,6 +92,11 @@
                                     <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
                                         <button type="submit" class="dropdown-item">Đăng Xuất</button>
                                     </form>
+                                </li>
+                                <!-- THÊM ĐƠN HÀNG CỦA TÔI -->
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">Đơn hàng của tôi</a>
                                 </li>
                             }
                             else

@@ -32,9 +32,16 @@ public partial class Customer
     [StringLength(255)]
     public string? Avatar { get; set; }
 
+    [StringLength(450)]
+    public string? UserId { get; set; }
+
     [InverseProperty("Customer")]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     [InverseProperty("Customer")]
     public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; } = new List<ShoppingCart>();
+
+    [ForeignKey("UserId")]
+    [InverseProperty("Customers")]
+    public virtual AspNetUser? User { get; set; }
 }

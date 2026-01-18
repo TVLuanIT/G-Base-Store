@@ -89,6 +89,8 @@ public partial class GbstoreContext : DbContext
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D84073996D");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Customers).HasConstraintName("FK_Customer_AspNetUsers");
         });
 
         modelBuilder.Entity<Order>(entity =>

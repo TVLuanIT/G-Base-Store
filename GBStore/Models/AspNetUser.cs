@@ -53,6 +53,9 @@ public partial class AspNetUser
     [InverseProperty("User")]
     public virtual ICollection<AspNetUserToken> AspNetUserTokens { get; set; } = new List<AspNetUserToken>();
 
+    [InverseProperty("User")]
+    public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
+
     [InverseProperty("Customer")]
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 

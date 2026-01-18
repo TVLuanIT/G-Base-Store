@@ -1,0 +1,92 @@
+﻿@using System.Globalization
+@model IEnumerable<GBStore.Models.OrderDetail>
+
+@{
+    var firstItem = Model?.FirstOrDefault();
+    decimal total = Model?.Sum(x => x.Quantity * x.Price) ?? 0;
+}
+
+<section class="h-100 gradient-custom">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-lg-10 col-xl-8">
+                <div class="card" style="border-radius: 10px;">
+
+                    <!-- Header -->
+                    <div class="card-header px-4 py-5">
+                        <h5 class="text-muted mb-0">
+                            Thanks for your Order,
+                            <span style="color: #a8729a;">
+                                @(firstItem?.Order?.CustomerName ?? "Khách hàng")
+                            </span>!
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <!-- Biên lai -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <p class="lead fw-normal mb-0" style="color: #a8729a;">Biên lai</p>
+                            <p class="small text-muted mb-0">
+                                Mã đơn hàng: @firstItem?.OrderId
+                            </p>
+                        </div>
+
+                        <!-- Header các cột -->
+                        <div class="row fw-bold text-center mb-2" style="border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+                            <div class="col-md-6 text-start">Tên sản phẩm</div>
+                            <div class="col-md-2">Số lượng</div>
+                            <div class="col-md-2">Giá</div>
+                            <div class="col-md-2">Thành tiền</div>
+                        </div>
+
+                        <!-- Danh sách sản phẩm -->
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <div class="row align-items-center text-center mb-2">
+                                    <div class="col-md-6 text-start">
+                                        @item.Product?.Name
+                                    </div>
+                                    <div class="col-md-2">
+                                        @item.Quantity
+                                    </div>
+                                    <div class="col-md-2">
+                                        @item.Price.ToString("C0", new CultureInfo("vi-VN"))
+                                    </div>
+                                    <div class="col-md-2">
+                                        @( (item.Quantity * item.Price).ToString("C0", new CultureInfo("vi-VN")) )
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <!-- Tổng cộng -->
+                        <div class="d-flex justify-content-between pt-2 mt-3 border-top pt-3">
+                            <p class="fw-bold mb-0">Tổng cộng</p>
+                            <p class="text-muted mb-0">
+                                <span class="fw-bold me-4">VNĐ</span>
+                                @total.ToString("C0", new CultureInfo("vi-VN"))
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer border-0 px-4 py-5"
+                         style="background-color: #a8729a; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                        <h5 class="d-flex align-items-center justify-content-end text-white text-uppercase mb-0">
+                            Tổng thanh toán:
+                            <span class="h2 mb-0 ms-2">@total.ToString("C0", new CultureInfo("vi-VN"))</span>
+                        </h5>
+                    </div>
+
+                </div>
+
+                <a asp-controller="Orders" asp-action="MyOrders" class="btn btn-secondary mt-3">
+                    Quay lại danh sách đơn hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
