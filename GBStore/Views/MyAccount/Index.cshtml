@@ -4,9 +4,13 @@
     ViewData["Title"] = "My Account";
 }
 
+@section Styles {
+    <link href="~/css/myaccount_template.css" rel="stylesheet" />
+}
+
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
 
             <div class="card shadow border-0 rounded-4">
                 <div class="card-body p-4">
@@ -24,29 +28,113 @@
 
                     <hr />
 
-                    <!-- Info -->
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Tên đăng nhập</div>
-                        <div class="col-sm-8 fw-semibold">@Model.NameAccount</div>
-                    </div>
+                    <div class="row">
+                        <!-- Sidebar -->
+                        <div class="col-md-4 mb-3">
+                            <ul class="nav flex-column nav-pills gap-1" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#dashboard"
+                                            type="button">
+                                        Dashboard
+                                    </button>
+                                </li>
 
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Số điện thoại</div>
-                        <div class="col-sm-8 fw-semibold">@Model.Phone</div>
-                    </div>
+                                <li class="nav-item">
+                                    <button class="nav-link"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#orders"
+                                            type="button">
+                                        Orders
+                                    </button>
+                                </li>
 
-                    <div class="row mb-3">
-                        <div class="col-sm-4 text-muted">Địa chỉ</div>
-                        <div class="col-sm-8 fw-semibold">@Model.CustomerAddress</div>
-                    </div>
+                                <li class="nav-item">
+                                    <button class="nav-link"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#address"
+                                            type="button">
+                                        Address
+                                    </button>
+                                </li>
 
-                    <div class="text-center mt-4">
-                        <a asp-action="Edit"
-                           asp-controller="MyAccount"
-                           class="btn btn-primary px-4">
-                            <i class="bi bi-pencil-square me-1"></i>
-                            Chỉnh sửa thông tin
-                        </a>
+                                <li class="nav-item">
+                                    <button class="nav-link"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#account"
+                                            type="button">
+                                        Account Details
+                                    </button>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger"
+                                       asp-controller="Account"
+                                       asp-action="Logout">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="col-md-8">
+                            <div class="tab-content">
+
+                                <!-- Dashboard -->
+                                <div class="tab-pane fade show active" id="dashboard">
+                                    <h5 class="mb-3">Thông tin cá nhân</h5>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-muted">Tên đăng nhập</div>
+                                        <div class="col-sm-8 fw-semibold">@Model.NameAccount</div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-muted">Số điện thoại</div>
+                                        <div class="col-sm-8 fw-semibold">@Model.Phone</div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 text-muted">Địa chỉ</div>
+                                        <div class="col-sm-8 fw-semibold">@Model.CustomerAddress</div>
+                                    </div>
+
+                                    <div class="text-end mt-4">
+                                        <a asp-action="Edit"
+                                           asp-controller="MyAccount"
+                                           class="btn btn-primary">
+                                            <i class="bi bi-pencil-square me-1"></i>
+                                            Chỉnh sửa thông tin
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Orders -->
+                                <div class="tab-pane fade" id="orders">
+                                    <h5>Đơn hàng</h5>
+                                    <p class="text-muted">
+                                        Chức năng đang phát triển.
+                                    </p>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="tab-pane fade" id="address">
+                                    <h5>Địa chỉ</h5>
+                                    <p>@Model.CustomerAddress</p>
+                                </div>
+
+                                <!-- Account Details -->
+                                <div class="tab-pane fade" id="account">
+                                    <h5>Account Details</h5>
+                                    <p class="text-muted">
+                                        Dùng form chỉnh sửa thông tin ở đây (sau).
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
 
                 </div>
