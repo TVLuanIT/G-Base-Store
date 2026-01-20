@@ -1,0 +1,99 @@
+﻿@model GBStore.Models.Customer
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+
+@section Styles {
+    <link href="~/css/editprofile_template.css" rel="stylesheet" />
+}
+
+<div class="container rounded bg-white mt-5 mb-5">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="row">
+
+            <!-- CỘT TRÁI: AVATAR -->
+            <div class="col-md-3 border-right">
+                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+
+                    <img class="rounded-circle mt-5"
+                         width="150"
+                         src="@(string.IsNullOrEmpty(Model.Avatar) ? "/images/default-avatar.png" : Model.Avatar)" />
+
+                    <span class="font-weight-bold mt-3">@Model.Name</span>
+                    <span class="text-black-50">@Model.Email</span>
+
+                    <div class="mt-3">
+                        <input type="file" name="AvatarFile" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT GIỮA: THÔNG TIN CHÍNH -->
+            <div class="col-md-5 border-right">
+                <div class="p-3 py-5">
+                    <h4 class="mb-3">Chỉnh sửa hồ sơ</h4>
+
+                    <div class="form-group mb-2">
+                        <label>Họ và tên</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Email</label>
+                        <input asp-for="Email" class="form-control" readonly />
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Số điện thoại</label>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Địa chỉ</label>
+                        <input asp-for="CustomerAddress" class="form-control" />
+                        <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <label>Tên tài khoản</label>
+                        <input asp-for="NameAccount" class="form-control" readonly />
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: THÔNG TIN PHỤ -->
+            <div class="col-md-4">
+                <div class="p-3 py-5">
+                    <h5>Thông tin bổ sung</h5>
+                    <p class="text-muted">
+                        Bạn có thể cập nhật thông tin cá nhân để thuận tiện khi đặt hàng.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

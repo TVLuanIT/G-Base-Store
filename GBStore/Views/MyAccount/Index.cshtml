@@ -37,16 +37,7 @@
                                             data-bs-toggle="tab"
                                             data-bs-target="#dashboard"
                                             type="button">
-                                        Dashboard
-                                    </button>
-                                </li>
-
-                                <li class="nav-item">
-                                    <button class="nav-link"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#orders"
-                                            type="button">
-                                        Orders
+                                        Tổng quan
                                     </button>
                                 </li>
 
@@ -55,7 +46,7 @@
                                             data-bs-toggle="tab"
                                             data-bs-target="#address"
                                             type="button">
-                                        Address
+                                        Địa chỉ
                                     </button>
                                 </li>
 
@@ -64,7 +55,7 @@
                                             data-bs-toggle="tab"
                                             data-bs-target="#account"
                                             type="button">
-                                        Account Details
+										Chi tiết tài khoản
                                     </button>
                                 </li>
 
@@ -72,7 +63,7 @@
                                     <a class="nav-link text-danger"
                                        asp-controller="Account"
                                        asp-action="Logout">
-                                        Logout
+                                        Đăng xuất
                                     </a>
                                 </li>
                             </ul>
@@ -96,13 +87,8 @@
                                         <div class="col-sm-8 fw-semibold">@Model.Phone</div>
                                     </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-sm-4 text-muted">Địa chỉ</div>
-                                        <div class="col-sm-8 fw-semibold">@Model.CustomerAddress</div>
-                                    </div>
-
                                     <div class="text-end mt-4">
-                                        <a asp-action="Edit"
+                                        <a asp-action="EditProfile"
                                            asp-controller="MyAccount"
                                            class="btn btn-primary">
                                             <i class="bi bi-pencil-square me-1"></i>
