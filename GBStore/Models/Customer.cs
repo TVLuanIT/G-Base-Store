@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace GBStore.Models;
 
 [Table("Customer")]
-[Index("Email", Name = "UQ__Customer__A9D10534C8CD6FF3", IsUnique = true)]
-[Index("NameAccount", Name = "UQ__Customer__E218DB2CF981F4AD", IsUnique = true)]
+[Index("Email", Name = "UQ__Customer__A9D1053495828150", IsUnique = true)]
+[Index("NameAccount", Name = "UQ__Customer__E218DB2C670D69EF", IsUnique = true)]
 public partial class Customer
 {
     [Key]

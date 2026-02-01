@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GBStore.Models;
 
 [Table("Brand")]
-[Index("BrandName", Name = "UQ__Brand__2206CE9B53E6D6EA", IsUnique = true)]
+[Index("BrandName", Name = "UQ__Brand__2206CE9B17EFDA15", IsUnique = true)]
 public partial class Brand
 {
     [Key]
